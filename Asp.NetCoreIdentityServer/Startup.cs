@@ -1,3 +1,4 @@
+using Asp.NetCoreIdentityServer.CustomValidation;
 using Asp.NetCoreIdentityServer.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,12 +31,15 @@ namespace Asp.NetCoreIdentityServer
 
             services.AddIdentity<AppUser, AppRole>(opts=> 
             {
+                opts.User.RequireUniqueEmail = true;
+                opts.User.AllowedUserNameCharacters = "abcçdefghýijklmnoöpqrsþtuüvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._";
+
                 opts.Password.RequireDigit = false;
                 opts.Password.RequireUppercase = false;
                 opts.Password.RequireLowercase = false;
                 opts.Password.RequireNonAlphanumeric = false;
                 opts.Password.RequiredLength = 4;
-            }).AddEntityFrameworkStores<AppIdentityDbContext>();
+            }).AddPasswordValidator<CustomPasswordValidator>().AddUserValidator<CustomUserValidator>().AddEntityFrameworkStores<AppIdentityDbContext>();
 
             services.AddMvc(option => option.EnableEndpointRouting = false);
         }
