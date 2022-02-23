@@ -28,7 +28,7 @@ namespace Asp.NetCoreIdentityServer
         {
             services.AddDbContext<AppIdentityDbContext>(options => options.UseSqlServer(configuration["ConnectionStrings:DefaultConnectionString"]));
 
-            services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<AppIdentityDbContext>();
+            services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<AppIdentityDbContext>();
 
             services.AddMvc(option => option.EnableEndpointRouting = false);
         }

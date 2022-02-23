@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Asp.NetCoreIdentityServer.Models
 {
-    public class AppUser : IdentityUser
+    public class AppRole:IdentityRole
     {
-       
+        
     }
 }
