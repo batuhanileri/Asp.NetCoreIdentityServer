@@ -14,7 +14,7 @@ namespace Asp.NetCoreIdentityServer.Controllers
         private UserManager<AppUser> _userManager { get; }
         private SignInManager<AppUser> _signInManager { get; }
 
-        public HomeController(UserManager<AppUser> userManager,SignInManager<AppUser> signInManager)
+        public HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -31,30 +31,63 @@ namespace Asp.NetCoreIdentityServer.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel loginViewModel)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 AppUser user = await _userManager.FindByEmailAsync(loginViewModel.Email);
 
-                if(user!=null)
+                if (user != null)
                 {
+                    if (await _userManager.IsLockedOutAsync(user)) 
+                    //IsLockedOutAsync booldur=  true olursa birden fazla yanlış şifre girilmiş olup ,
+                    //hesabı belirlenen süre kadar kilitlenir.
+                    {
+                        ModelState.AddModelError("", "Hesabınız bir süreliğine kilitlenmiştir. " +
+                            " Lütfen daha sonra tekrar deneyiniz.");
+
+                        return View(loginViewModel);
+                    }
                     await _signInManager.SignOutAsync(); // önce bi çıkış olsun ki sistemde eski bir key silinsin
 
-                    Microsoft.AspNetCore.Identity.SignInResult signInResult =  await _signInManager.PasswordSignInAsync(user, loginViewModel.Password, loginViewModel.RememberMe, false);
+                    Microsoft.AspNetCore.Identity.SignInResult signInResult = await _signInManager.PasswordSignInAsync(user, loginViewModel.Password, loginViewModel.RememberMe, false);
 
                     // Paramaterenin içindeki loginViewModel.RememberMe beni hatırla özelliği gibi cookie expiration(60 gün) olanı etkin hale getirme işine yarıyor
                     // Son false başarsısız girişlerde kullanıcıyı kilitlicek misin anlamına geliyor.
                     if (signInResult.Succeeded)
                     {
-                        if(TempData["ReturnUrl"]!=null)
+                        await _userManager.ResetAccessFailedCountAsync(user);//Kullanıcı başarılı giriş yapmış fail sayısını 0'lıyoruz.
+
+                        if (TempData["ReturnUrl"] != null)
                         {
                             return Redirect(TempData["ReturnUrl"].ToString());
                         }
                         return RedirectToAction("Index", "Member");
                     }
+                    else
+                    {
+                        await _userManager.AccessFailedAsync(user); // Kullanıcın her yanlış girişini kaydedip sayıyı 1 artırır. 
+
+                        int fail = await _userManager.GetAccessFailedCountAsync(user); // Kullanıcının kaç kez başarısız giriş yaptığını kaydediyoruz.
+                        ModelState.AddModelError("", $"{fail} kez başarısız giriş yaptınız.");
+
+                        if(fail==3)
+                        {
+                            await _userManager.SetLockoutEndDateAsync(user, 
+                                 new DateTimeOffset(DateTime.Now.AddMinutes(20)));
+                            
+                            // kullanıcı 3 kez başarısız girerse 20 dakika boyunca girişini engelliyoruz.
+
+                            ModelState.AddModelError("", "Hesabınız 3 başarısız girişten dolayı 20 dakika süreyle kilitlenmiştir." +
+                                " Lütfen daha sonra tekrar deneyiniz.");
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("", "Email adresiniz veya Şifreniz yanlıştır.");
+                        }
+                    }
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Geçersiz email adresi veya şifresi");
+                    ModelState.AddModelError("", "Bu email adresine kayıtlı kullanıcı bulunamamıştır.");
                 }
             }
 
