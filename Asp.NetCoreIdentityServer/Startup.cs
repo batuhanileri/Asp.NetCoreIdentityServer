@@ -39,7 +39,10 @@ namespace Asp.NetCoreIdentityServer
                 opts.Password.RequireLowercase = false;
                 opts.Password.RequireNonAlphanumeric = false;
                 opts.Password.RequiredLength = 4;
-            }).AddPasswordValidator<CustomPasswordValidator>().AddUserValidator<CustomUserValidator>().AddEntityFrameworkStores<AppIdentityDbContext>();
+            }).AddPasswordValidator<CustomPasswordValidator>()
+              .AddUserValidator<CustomUserValidator>()
+              .AddErrorDescriber<CustomIdentityErrorDescriber>()
+              .AddEntityFrameworkStores<AppIdentityDbContext>();
 
             services.AddMvc(option => option.EnableEndpointRouting = false);
         }
