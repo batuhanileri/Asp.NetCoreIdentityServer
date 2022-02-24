@@ -2,6 +2,7 @@ using Asp.NetCoreIdentityServer.CustomValidation;
 using Asp.NetCoreIdentityServer.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,30 @@ namespace Asp.NetCoreIdentityServer
         {
             services.AddDbContext<AppIdentityDbContext>(options => options.UseSqlServer(configuration["ConnectionStrings:DefaultConnectionString"]));
 
+            CookieBuilder cookieBuilder = new CookieBuilder();
+
+            cookieBuilder.Name = "MyBlog"; 
+            cookieBuilder.HttpOnly = false; //saldýrýlarda client-side tarafýndan cookie'lere eriþemez.
+                                            // sadece http isteði üzerinden cookie bilgisi alýnabilir.
+
+            cookieBuilder.Expiration = TimeSpan.FromDays(60); // cookie tutma deðeri 60 gün
+            cookieBuilder.SameSite = SameSiteMode.Lax; //Siteler arasý cookie taþýnýr
+                                                       //Strict ise bankalar vb. kurumlar tarafýndan kullanýlýr cookieye farklý siteden eriþilemez taþýnamaz.
+
+            cookieBuilder.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            //SameAsRequest : Cookie Http üzerinden geldiyse Http üzerinden cookieyi gönderir
+            //                Cookie Https üzerinden geldiyse Https üzerinden cookieyi gönderir
+            //Always : Cookie sadece Https üzerinden geldiyse gönderir.
+            //None : Protokoller önemsizdir.
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = new PathString("/Home/Login"); // Giriþ yapmadýysa kullanýcý login sayfasýna otomatik yönlendiriyoruz.
+                options.Cookie = cookieBuilder;
+                options.SlidingExpiration = true; //Kullanýcý belirtilen 60 günün 30 gününden sonra tekrar girdiyse cookileri 60 gün daha otomatik olarak uzatýlýr.
+                
+            });
+
             services.AddIdentity<AppUser, AppRole>(opts=> 
             {
                 opts.User.RequireUniqueEmail = true;
@@ -40,7 +65,7 @@ namespace Asp.NetCoreIdentityServer
                 opts.Password.RequireNonAlphanumeric = false;
                 opts.Password.RequiredLength = 4;
             }).AddPasswordValidator<CustomPasswordValidator>()
-              .AddUserValidator<CustomUserValidator>()
+              .AddUserValidator<CustomUserValidator>() 
               .AddErrorDescriber<CustomIdentityErrorDescriber>()
               .AddEntityFrameworkStores<AppIdentityDbContext>();
 
