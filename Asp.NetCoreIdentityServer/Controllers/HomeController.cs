@@ -12,18 +12,53 @@ namespace Asp.NetCoreIdentityServer.Controllers
     public class HomeController : Controller
     {
         private UserManager<AppUser> _userManager { get; }
+        private SignInManager<AppUser> _signInManager { get; }
 
-        public HomeController(UserManager<AppUser> userManager)
+        public HomeController(UserManager<AppUser> userManager,SignInManager<AppUser> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
         public IActionResult Index()
         {
             return View();
         }
-        public IActionResult Login()
+        public IActionResult Login(string ReturnUrl)
         {
+            TempData["ReturnUrl"] = ReturnUrl;
             return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginViewModel loginViewModel)
+        {
+            if(ModelState.IsValid)
+            {
+                AppUser user = await _userManager.FindByEmailAsync(loginViewModel.Email);
+
+                if(user!=null)
+                {
+                    await _signInManager.SignOutAsync(); // önce bi çıkış olsun ki sistemde eski bir key silinsin
+
+                    Microsoft.AspNetCore.Identity.SignInResult signInResult =  await _signInManager.PasswordSignInAsync(user, loginViewModel.Password, loginViewModel.RememberMe, false);
+
+                    // Paramaterenin içindeki loginViewModel.RememberMe beni hatırla özelliği gibi cookie expiration(60 gün) olanı etkin hale getirme işine yarıyor
+                    // Son false başarsısız girişlerde kullanıcıyı kilitlicek misin anlamına geliyor.
+                    if (signInResult.Succeeded)
+                    {
+                        if(TempData["ReturnUrl"]!=null)
+                        {
+                            return Redirect(TempData["ReturnUrl"].ToString());
+                        }
+                        return RedirectToAction("Index", "Member");
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Geçersiz email adresi veya şifresi");
+                }
+            }
+
+            return View(loginViewModel);
         }
 
         public IActionResult SignUp()
