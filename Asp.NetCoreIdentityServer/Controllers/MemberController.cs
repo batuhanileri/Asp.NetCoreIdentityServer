@@ -34,6 +34,51 @@ namespace Asp.NetCoreIdentityServer.Controllers
             return View(userViewModel);
         }
 
+        public IActionResult UserEdit()
+        {
+            AppUser user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            UserViewModel userViewModel = user.Adapt<UserViewModel>();
+            return View(userViewModel);
+
+        }
+        [HttpPost]
+        public async Task<IActionResult> UserEdit(UserViewModel userViewModel)
+        {
+            ModelState.Remove("Password");
+
+            //Userviewmodelde password alanını burda güncellemediğimiz için invalid geliyor
+            //o yüzden model state kısmından password alanını kontrol etmemesi için remove methodunu kullanıyoruz.
+
+            if(ModelState.IsValid)
+            {
+                AppUser user =await _userManager.FindByNameAsync(User.Identity.Name);
+
+                user.UserName = userViewModel.UserName;
+                user.Email = userViewModel.Email;
+                user.PhoneNumber = userViewModel.PhoneNumber;
+
+                IdentityResult result = await _userManager.UpdateAsync(user);
+               
+                if(result.Succeeded)
+                {
+                    await _userManager.UpdateSecurityStampAsync(user);
+
+                    await _signInManager.SignOutAsync();
+                    await _signInManager.SignInAsync(user,true);
+                    
+                    ViewBag.success = "true";
+                }
+                else
+                {
+                    foreach (var item in result.Errors)
+                    {
+                        ModelState.AddModelError("", item.Description);
+                    }
+                }
+
+            }
+            return View(userViewModel);
+        }
         public IActionResult PasswordChange()
         {
 
@@ -65,7 +110,7 @@ namespace Asp.NetCoreIdentityServer.Controllers
                             _signInManager.SignOutAsync();
                             _signInManager.PasswordSignInAsync(user, passwordChangeViewModel.PasswordNew, true, false);
                                                                        
-                            ViewBag.success = "true";
+                            ViewBag.success = "true"; 
                         }
                         else
                         {
