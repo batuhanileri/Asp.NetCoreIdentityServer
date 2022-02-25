@@ -19,15 +19,18 @@ namespace Asp.NetCoreIdentityServer.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
         }
+
         public IActionResult Index()
         {
             return View();
         }
+
         public IActionResult Login(string ReturnUrl)
         {
             TempData["ReturnUrl"] = ReturnUrl;
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel loginViewModel)
         {
@@ -37,7 +40,7 @@ namespace Asp.NetCoreIdentityServer.Controllers
 
                 if (user != null)
                 {
-                    if (await _userManager.IsLockedOutAsync(user)) 
+                    if (await _userManager.IsLockedOutAsync(user))
                     //IsLockedOutAsync booldur=  true olursa birden fazla yanlış şifre girilmiş olup ,
                     //hesabı belirlenen süre kadar kilitlenir.
                     {
@@ -69,11 +72,11 @@ namespace Asp.NetCoreIdentityServer.Controllers
                         int fail = await _userManager.GetAccessFailedCountAsync(user); // Kullanıcının kaç kez başarısız giriş yaptığını kaydediyoruz.
                         ModelState.AddModelError("", $"{fail} kez başarısız giriş yaptınız.");
 
-                        if(fail==3)
+                        if (fail == 3)
                         {
-                            await _userManager.SetLockoutEndDateAsync(user, 
+                            await _userManager.SetLockoutEndDateAsync(user,
                                  new DateTimeOffset(DateTime.Now.AddMinutes(20)));
-                            
+
                             // kullanıcı 3 kez başarısız girerse 20 dakika boyunca girişini engelliyoruz.
 
                             ModelState.AddModelError("", "Hesabınız 3 başarısız girişten dolayı 20 dakika süreyle kilitlenmiştir." +
@@ -98,6 +101,7 @@ namespace Asp.NetCoreIdentityServer.Controllers
         {
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> SignUp(UserViewModel userViewModel)
         {
@@ -128,6 +132,88 @@ namespace Asp.NetCoreIdentityServer.Controllers
             }
 
             return View(userViewModel);
+        }
+
+        public IActionResult ResetPassword()
+        {
+            return View();
+        }
+        [HttpPost]
+        public IActionResult ResetPassword(PasswordResetViewModel passwordResetViewModel)
+        {
+
+            AppUser user = _userManager.FindByEmailAsync(passwordResetViewModel.Email).Result;
+
+            if (user != null)
+            {
+                string passwordResetToken = _userManager.GeneratePasswordResetTokenAsync(user).Result;
+                //random bir token üretiyoruz.
+
+                string passwordResetLink = Url.Action("ResetPasswordConfirm", "Home", new
+                {
+                    userId = user.Id,
+                    token = passwordResetToken
+                    
+                }, HttpContext.Request.Scheme);
+
+                // id + token şeklinde link oluşuyor..
+
+
+                Helper.PasswordReset.PasswordResetSendEmail(passwordResetLink, passwordResetViewModel.Email);
+
+                ViewBag.status = "Success";
+            }
+
+            else
+            {
+                ModelState.AddModelError("", "Sistemde kayıtlı bir email adresi bulunamamıştır.");
+            }
+
+            return View(passwordResetViewModel);
+        }
+        public IActionResult ResetPasswordConfirm(string userId,string token)
+        {
+            TempData["userId"] = userId;
+            TempData["token"] = token;
+
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ResetPasswordConfirm([Bind("NewPassword")]PasswordResetViewModel passwordResetViewModel)
+            
+        //Bind ile masterda sadece gelmesini istediğimiz verinin propertysini(kullanmıcağımız property varsa Bind kullanıyoruz) yazıyoruz.
+        {
+            string token = TempData["token"].ToString(); //Sayfalar arası veri taşımak için TempData kullanıyoruz.
+            string userId = TempData["userId"].ToString();
+
+            AppUser user =await _userManager.FindByIdAsync(userId);
+
+            if(user!=null)
+            {
+                IdentityResult result = await _userManager.ResetPasswordAsync(user, token, passwordResetViewModel.NewPassword);
+
+                if(result.Succeeded)
+                {
+                    await _userManager.UpdateSecurityStampAsync(user); //kullanıcı şifre,username , mail gibi önemli alanları değiştirirse 
+                                                                       //securitystamp'i de güncelliyoruz ki eski şifre,username ile tekrardan işlem yapamasın.
+
+                    ViewBag.status = "Success";
+                    
+                }
+                else
+                {
+                    foreach (var item in result.Errors)
+                    {
+                        ModelState.AddModelError("", item.Description);
+                    }
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("", "Hata Meydana Gelmiştir.");
+            }
+
+            return View(passwordResetViewModel);
         }
     }
 }

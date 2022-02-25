@@ -45,7 +45,8 @@ namespace Asp.NetCoreIdentityServer
             }).AddPasswordValidator<CustomPasswordValidator>()
               .AddUserValidator<CustomUserValidator>() 
               .AddErrorDescriber<CustomIdentityErrorDescriber>()
-              .AddEntityFrameworkStores<AppIdentityDbContext>();
+              .AddEntityFrameworkStores<AppIdentityDbContext>()
+              .AddDefaultTokenProviders();
 
 
             CookieBuilder cookieBuilder = new CookieBuilder();
