@@ -16,7 +16,7 @@ namespace Asp.NetCoreIdentityServer.CustomValidation
                 Description = $"Bu {userName} geçersizdir."
             };
         }
-
+        
         public override IdentityError DuplicateUserName(string userName)
         {
             return new IdentityError()
