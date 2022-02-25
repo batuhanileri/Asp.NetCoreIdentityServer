@@ -68,6 +68,7 @@ namespace Asp.NetCoreIdentityServer
             services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = new PathString("/Home/Login"); // Giriþ yapmadýysa kullanýcý login sayfasýna otomatik yönlendiriyoruz.
+                options.LogoutPath = new PathString("/Member/Logout");
                 options.Cookie = cookieBuilder;
                 options.ExpireTimeSpan = TimeSpan.FromDays(60);// cookie tutma deðeri 60 gün
                 options.SlidingExpiration = true; //Kullanýcý belirtilen 60 günün 30 gününden sonra tekrar girdiyse cookileri 60 gün daha otomatik olarak uzatýlýr.

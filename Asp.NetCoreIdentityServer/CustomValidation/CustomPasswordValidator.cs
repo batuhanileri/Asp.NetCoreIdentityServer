@@ -23,27 +23,27 @@ namespace Asp.NetCoreIdentityServer.CustomValidation
                         Description = "Şifre" +
                         " alanı kullanıcı adı içeremez."
                     });
-
                 }
             }
-                if (password.ToLower().Contains("1234"))
-                {
-                    errors.Add(new IdentityError()
-                    {
-                        Code = "PasswordContains1234",
-                        Description = "Şifre" +
-                       " alanı ardışık sayı içeremez."
-                    });
-                }
 
-                if (errors.Count == 0)
+            if (password.ToLower().Contains("1234"))
+            {
+                errors.Add(new IdentityError()
                 {
-                    return Task.FromResult(IdentityResult.Success);
-                }
-                else
-                {
-                    return Task.FromResult(IdentityResult.Failed(errors.ToArray()));
-                }
+                    Code = "PasswordContains1234",
+                    Description = "Şifre" +
+                   " alanı ardışık sayı içeremez."
+                });
+            }
+
+            if (errors.Count == 0)
+            {
+                return Task.FromResult(IdentityResult.Success);
+            }
+            else
+            {
+                return Task.FromResult(IdentityResult.Failed(errors.ToArray()));
             }
         }
     }
+}

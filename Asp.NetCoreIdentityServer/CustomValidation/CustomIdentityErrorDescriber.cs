@@ -16,7 +16,14 @@ namespace Asp.NetCoreIdentityServer.CustomValidation
                 Description = $"Bu {userName} geçersizdir."
             };
         }
-        
+        public override IdentityError InvalidToken()
+        {
+            return new IdentityError()
+            {
+                Code = "InvalidToken",
+                Description = "Bu token geçersizdir."
+            };
+        }
         public override IdentityError DuplicateUserName(string userName)
         {
             return new IdentityError()

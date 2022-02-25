@@ -130,5 +130,9 @@ namespace Asp.NetCoreIdentityServer.Controllers
 
             return View(passwordChangeViewModel);
         }
+        public void Logout()
+        {
+            _signInManager.SignOutAsync();
+        }
     }
 }
