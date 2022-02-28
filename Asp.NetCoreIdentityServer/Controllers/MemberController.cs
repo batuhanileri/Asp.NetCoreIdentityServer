@@ -16,20 +16,16 @@ using System.IO;
 namespace Asp.NetCoreIdentityServer.Controllers
 {
     [Authorize]
-    public class MemberController : Controller
+    public class MemberController : BaseController
     {
-        private UserManager<AppUser> _userManager { get; }
-        private SignInManager<AppUser> _signInManager { get; }
-
-        public MemberController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public MemberController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager):base(userManager,signInManager)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
+           
         }
 
         public IActionResult Index()
         {
-            AppUser user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            AppUser user = CurrentUser;
 
             UserViewModel userViewModel = user.Adapt<UserViewModel>();
 
@@ -40,7 +36,7 @@ namespace Asp.NetCoreIdentityServer.Controllers
 
         public IActionResult UserEdit()
         {
-            AppUser user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            AppUser user = CurrentUser;
 
             UserViewModel userViewModel = user.Adapt<UserViewModel>();
 
@@ -59,9 +55,9 @@ namespace Asp.NetCoreIdentityServer.Controllers
 
             if (ModelState.IsValid)
             {
-                AppUser user =await _userManager.FindByNameAsync(User.Identity.Name);
+                AppUser user = CurrentUser;
 
-                if(userPicture!=null && userPicture.Length>0)
+                if (userPicture!=null && userPicture.Length>0)
                 {
                     var fileName = Guid.NewGuid().ToString() + Path.GetExtension(userPicture.FileName);
                     var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/UserPicture", fileName);
@@ -94,10 +90,7 @@ namespace Asp.NetCoreIdentityServer.Controllers
                 }
                 else
                 {
-                    foreach (var item in result.Errors)
-                    {
-                        ModelState.AddModelError("", item.Description);
-                    }
+                    AddModelError(result);
                 }
 
             }
@@ -113,7 +106,7 @@ namespace Asp.NetCoreIdentityServer.Controllers
         {
             if (ModelState.IsValid)
             {
-                AppUser user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+                AppUser user = CurrentUser;
 
                 if (user != null)
                 {
@@ -138,10 +131,7 @@ namespace Asp.NetCoreIdentityServer.Controllers
                         }
                         else
                         {
-                            foreach (var item in result.Errors)
-                            {
-                                ModelState.AddModelError("", item.Description);
-                            }
+                            AddModelError(result);
                         }
                     }
                     else
