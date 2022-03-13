@@ -72,6 +72,7 @@ namespace Asp.NetCoreIdentityServer
                 options.Cookie = cookieBuilder;
                 options.ExpireTimeSpan = TimeSpan.FromDays(60);// cookie tutma deðeri 60 gün
                 options.SlidingExpiration = true; //Kullanýcý belirtilen 60 günün 30 gününden sonra tekrar girdiyse cookileri 60 gün daha otomatik olarak uzatýlýr.
+                options.AccessDeniedPath = new PathString("/Member/AccessDenied"); // Kullanýcý yetkisinin olmadýðý eriþemiceði alanlarda bilgi vermek için yönlendirme yapýyoruz. 
             });
 
             services.AddMvc(option => option.EnableEndpointRouting = false);

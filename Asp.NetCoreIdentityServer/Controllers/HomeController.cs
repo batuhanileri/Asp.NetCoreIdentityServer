@@ -12,7 +12,6 @@ namespace Asp.NetCoreIdentityServer.Controllers
     public class HomeController : BaseController
     {
     
-   
         public HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager):base(userManager,signInManager)
         {
           
@@ -197,7 +196,7 @@ namespace Asp.NetCoreIdentityServer.Controllers
                                                                        //securitystamp'i de güncelliyoruz ki eski şifre,username ile tekrardan işlem yapamasın.
 
                     ViewBag.status = "Success";
-                    
+                     
                 }
                 else
                 {
