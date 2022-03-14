@@ -1,0 +1,33 @@
+﻿@model List<AppRole>
+@{
+    ViewData["Title"] = "Roles";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<h1>Roller</h1>
+<hr />  
+
+<table class="table table table-bordered table-striped">
+    <tr>
+        <th>Id</th>
+        <th>Rol İsmi</th>
+        <th>Rol Sil</th>
+        <th>Rol Güncelleme</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Id</td>
+            <td>@item.Name</td>
+
+            <td>
+            <form asp-action="RoleDelete" asp-route-id="@item.Id" method="post">
+                <button class="btn btn-success" type="submit">Sil</button>
+            </form>
+            <td>
+                <a class="btn btn-info" asp-action="RoleUpdate" asp-route-id="@item.Id">Güncelle</a>
+            </td>
+        </tr>
+    }
+</table>
+<a asp-action="RoleCreate" class="btn btn-info">Rol Oluştur</a>
