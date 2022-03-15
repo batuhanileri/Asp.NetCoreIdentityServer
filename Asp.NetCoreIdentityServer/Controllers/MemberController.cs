@@ -152,5 +152,11 @@ namespace Asp.NetCoreIdentityServer.Controllers
         {
             return View();
         }
+
+
+
+
+
+
     }
 }

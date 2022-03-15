@@ -7,8 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
+
 namespace Asp.NetCoreIdentityServer.Controllers
 {
+    [Authorize(Roles ="Admin")]
     public class AdminController : BaseController
     {
 
