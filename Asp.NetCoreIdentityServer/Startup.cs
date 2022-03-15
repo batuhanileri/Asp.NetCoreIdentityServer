@@ -33,10 +33,18 @@ namespace Asp.NetCoreIdentityServer
 
             services.AddAuthorization(opts =>
             {
-                opts.AddPolicy("BursaPolicy", policy =>
+                opts.AddPolicy("CityPolicy", policy =>
                  {
                      policy.RequireClaim("City", "Bursa");
                  });
+
+                opts.AddPolicy("BirthDayPolicy", policy =>
+                {
+                    policy.RequireClaim("BirthDay");
+                });
+
+
+
             });
 
             services.AddIdentity<AppUser, AppRole>(opts=> 

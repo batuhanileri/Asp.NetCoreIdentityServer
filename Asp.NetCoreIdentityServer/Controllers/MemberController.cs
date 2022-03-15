@@ -148,18 +148,35 @@ namespace Asp.NetCoreIdentityServer.Controllers
         {
             _signInManager.SignOutAsync();
         }
-        public IActionResult AccessDenied()
+        public IActionResult AccessDenied(string returnUrl)
         {
+            if(returnUrl.Contains("BirthDayClaims"))
+            {
+                ViewBag.message = "Erişmeye çalıştığın sayfa 15 yaşından büyük olmadığınız için " +
+                    "giriş yapamıyorsunuz.";
+            }
+            else if(returnUrl.Contains("CityClaimsBursa"))
+            {
+                ViewBag.message = "Bu sayfaya sadece şehri bursa olanlar erişebilir.";
+            }
+            else
+            {
+                ViewBag.message = "Bu Sayfaya Erişim Yetkiniz Yoktur..";
+            }
             return View();
         }
 
-        [Authorize(Policy ="BursaPolicy")]
+        [Authorize(Policy ="CityPolicy")]
         public IActionResult CityClaimsBursa()
         {
             return View();
         }
 
-
+        [Authorize(Policy = "BirthDayPolicy")]
+        public IActionResult BirthDayClaims()
+        {
+            return View();
+        }
 
 
     }

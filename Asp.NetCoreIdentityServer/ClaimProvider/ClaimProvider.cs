@@ -27,6 +27,21 @@ namespace Asp.NetCoreIdentityServer.ClaimProvider
 
                 if(user !=null)
                 {
+                    if(user.BirthDay!=null)
+                    {
+                        var today = DateTime.Today;
+                        var age = today.Year - user.BirthDay?.Year;
+
+                        if(age>15)
+                        {
+                            Claim birthDayClaim = new Claim("BirthDay", user.BirthDay?.ToString(), ClaimValueTypes.String, "Internal");
+
+                            identity.AddClaim(birthDayClaim);
+                        }
+                    }
+
+
+
                     if(user.City!=null)
                     {
                         if(!principal.HasClaim(c=>c.Type=="City"))
