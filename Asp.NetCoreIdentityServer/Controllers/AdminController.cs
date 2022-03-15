@@ -154,5 +154,10 @@ namespace Asp.NetCoreIdentityServer.Controllers
             }
             return RedirectToAction("Users");
         }
+
+        public IActionResult Claims()
+        {
+            return View(User.Claims.ToList());
+        }
     }
 }

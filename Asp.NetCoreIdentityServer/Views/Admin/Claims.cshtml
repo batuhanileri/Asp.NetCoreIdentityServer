@@ -1,0 +1,30 @@
+﻿@model List<System.Security.Claims.Claim>
+@{
+    ViewData["Title"] = "Claims";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1>Claims</h1>
+<hr />
+<div style="overflow-x:auto;">
+    <table class="table table-bordered table-striped border-0">
+        <tr>
+            <th>Kim</th>
+            <th>Dağıtıcı</th>
+            <th>Adı</th>
+            <th>Değer</th>
+        </tr>
+
+        @foreach (System.Security.Claims.Claim item in Model)
+        {
+            <tr>
+                <td>@item.Subject.Name</td>
+                <td>@item.Issuer</td>
+                <td>@item.Type</td>
+                <td>@item.Value</td>
+
+
+            </tr>
+        }
+    </table>
+    </div>
