@@ -153,7 +153,11 @@ namespace Asp.NetCoreIdentityServer.Controllers
             return View();
         }
 
-
+        [Authorize(Policy ="BursaPolicy")]
+        public IActionResult CityClaimsBursa()
+        {
+            return View();
+        }
 
 
 

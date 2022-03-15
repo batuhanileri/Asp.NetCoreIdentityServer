@@ -1,5 +1,6 @@
 using Asp.NetCoreIdentityServer.CustomValidation;
 using Asp.NetCoreIdentityServer.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -30,7 +31,13 @@ namespace Asp.NetCoreIdentityServer
         {
             services.AddDbContext<AppIdentityDbContext>(options => options.UseSqlServer(configuration["ConnectionStrings:DefaultConnectionString"]));
 
-            
+            services.AddAuthorization(opts =>
+            {
+                opts.AddPolicy("BursaPolicy", policy =>
+                 {
+                     policy.RequireClaim("City", "Bursa");
+                 });
+            });
 
             services.AddIdentity<AppUser, AppRole>(opts=> 
             {
@@ -74,6 +81,8 @@ namespace Asp.NetCoreIdentityServer
                 options.SlidingExpiration = true; //Kullanýcý belirtilen 60 günün 30 gününden sonra tekrar girdiyse cookileri 60 gün daha otomatik olarak uzatýlýr.
                 options.AccessDeniedPath = new PathString("/Member/AccessDenied"); // Kullanýcý yetkisinin olmadýðý eriþemiceði alanlarda bilgi vermek için yönlendirme yapýyoruz. 
             });
+
+            services.AddScoped<IClaimsTransformation, ClaimProvider.ClaimProvider>();
 
             services.AddMvc(option => option.EnableEndpointRouting = false);
         }
