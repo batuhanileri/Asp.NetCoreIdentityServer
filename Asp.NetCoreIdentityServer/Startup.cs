@@ -1,6 +1,8 @@
 using Asp.NetCoreIdentityServer.CustomValidation;
 using Asp.NetCoreIdentityServer.Models;
+using Asp.NetCoreIdentityServer.Requirement;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -29,6 +31,7 @@ namespace Asp.NetCoreIdentityServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddTransient<IAuthorizationHandler, ExpireDateExchangeHandler>(); //her karþýlaþtýðýnda bir tane üreticek
             services.AddDbContext<AppIdentityDbContext>(options => options.UseSqlServer(configuration["ConnectionStrings:DefaultConnectionString"]));
 
             services.AddAuthorization(opts =>
@@ -42,7 +45,10 @@ namespace Asp.NetCoreIdentityServer
                 {
                     policy.RequireClaim("BirthDay");
                 });
-
+                opts.AddPolicy("ExchangePolicy", policy =>
+                {
+                    policy.AddRequirements(new ExpireDateExchangeRequirement());
+                });
 
 
             });

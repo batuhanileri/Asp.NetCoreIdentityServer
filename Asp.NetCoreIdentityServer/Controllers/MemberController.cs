@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Asp.NetCoreIdentityServer.Enums;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using System.Security.Claims;
 
 namespace Asp.NetCoreIdentityServer.Controllers
 {
@@ -159,6 +160,10 @@ namespace Asp.NetCoreIdentityServer.Controllers
             {
                 ViewBag.message = "Bu sayfaya sadece şehri bursa olanlar erişebilir.";
             }
+            else if (returnUrl.Contains("Exchange"))
+            {
+                ViewBag.message = "30 günlük ücretsiz deneme hakkınız sona ermiştir.";
+            }
             else
             {
                 ViewBag.message = "Bu Sayfaya Erişim Yetkiniz Yoktur..";
@@ -178,6 +183,27 @@ namespace Asp.NetCoreIdentityServer.Controllers
             return View();
         }
 
+        public async Task<IActionResult> ExchangeRedirect()
+        {
+            bool result = User.HasClaim(x => x.Type == "ExpireDateExchange");
 
+            if(!result)
+            {
+                Claim ExpireDateExchange = new Claim("ExpireDateExchange", DateTime.Now.AddDays(30).ToShortDateString(),ClaimValueTypes.String,"Internal");
+
+                await _userManager.AddClaimAsync(CurrentUser, ExpireDateExchange);
+                await _signInManager.SignOutAsync();
+                await _signInManager.SignInAsync(CurrentUser, true);
+            }
+
+            return RedirectToAction("Exchange");
+        }
+       
+        [Authorize(Policy = "ExchangePolicy")]
+        public IActionResult Exchange()
+        {
+            return View();
+        }
+            
     }
 }
