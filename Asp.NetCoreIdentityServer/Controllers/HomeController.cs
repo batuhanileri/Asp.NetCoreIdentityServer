@@ -11,15 +11,15 @@ namespace Asp.NetCoreIdentityServer.Controllers
 {
     public class HomeController : BaseController
     {
-    
-        public HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager):base(userManager,signInManager)
+
+        public HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager) : base(userManager, signInManager)
         {
-          
+
         }
 
         public IActionResult Index()
         {
-            if(User.Identity.IsAuthenticated)
+            if (User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Member");
             }
@@ -50,6 +50,15 @@ namespace Asp.NetCoreIdentityServer.Controllers
 
                         return View(loginViewModel);
                     }
+
+                    if (_userManager.IsEmailConfirmedAsync(user).Result == false)
+                    {
+                        ModelState.AddModelError("", "Email Adresiniz Onaylanmamıştır. Lütfen E-postanızı kontrol ediniz");
+                        return View(loginViewModel);
+
+                    }
+
+
                     await _signInManager.SignOutAsync(); // önce bi çıkış olsun ki sistemde eski bir key silinsin
 
                     Microsoft.AspNetCore.Identity.SignInResult signInResult = await _signInManager.PasswordSignInAsync(user, loginViewModel.Password, loginViewModel.RememberMe, false);
@@ -118,6 +127,16 @@ namespace Asp.NetCoreIdentityServer.Controllers
 
                 if (result.Succeeded)
                 {
+                    string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+                    string link = Url.Action("ConfirmEmail", "Home", new
+                    {
+                        userId = user.Id,
+                        token = confirmationToken
+                    }, protocol: HttpContext.Request.Scheme);
+
+                    Helper.EmailConfirmation.SendEmail(link, user.Email);
+
                     return RedirectToAction("Login");
                 }
 
@@ -151,7 +170,7 @@ namespace Asp.NetCoreIdentityServer.Controllers
                 {
                     userId = user.Id,
                     token = passwordResetToken
-                    
+
                 }, HttpContext.Request.Scheme);
 
                 // id + token şeklinde link oluşuyor..
@@ -169,7 +188,7 @@ namespace Asp.NetCoreIdentityServer.Controllers
 
             return View(passwordResetViewModel);
         }
-        public IActionResult ResetPasswordConfirm(string userId,string token)
+        public IActionResult ResetPasswordConfirm(string userId, string token)
         {
             TempData["userId"] = userId;
             TempData["token"] = token;
@@ -177,26 +196,26 @@ namespace Asp.NetCoreIdentityServer.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> ResetPasswordConfirm([Bind("NewPassword")]PasswordResetViewModel passwordResetViewModel)
-            
+        public async Task<IActionResult> ResetPasswordConfirm([Bind("NewPassword")] PasswordResetViewModel passwordResetViewModel)
+
         //Bind ile masterda sadece gelmesini istediğimiz verinin propertysini(kullanmıcağımız property varsa Bind kullanıyoruz) yazıyoruz.
         {
             string token = TempData["token"].ToString(); //Sayfalar arası veri taşımak için TempData kullanıyoruz.
             string userId = TempData["userId"].ToString();
 
-            AppUser user =await _userManager.FindByIdAsync(userId);
+            AppUser user = await _userManager.FindByIdAsync(userId);
 
-            if(user!=null)
+            if (user != null)
             {
                 IdentityResult result = await _userManager.ResetPasswordAsync(user, token, passwordResetViewModel.NewPassword);
 
-                if(result.Succeeded)
+                if (result.Succeeded)
                 {
                     await _userManager.UpdateSecurityStampAsync(user); //kullanıcı şifre,username , mail gibi önemli alanları değiştirirse 
                                                                        //securitystamp'i de güncelliyoruz ki eski şifre,username ile tekrardan işlem yapamasın.
 
                     ViewBag.status = "Success";
-                     
+
                 }
                 else
                 {
@@ -210,5 +229,24 @@ namespace Asp.NetCoreIdentityServer.Controllers
 
             return View(passwordResetViewModel);
         }
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            IdentityResult result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if(result.Succeeded)
+            {
+                ViewBag.status = "Email adresiniz onaylanmıştır. Login Ekranından giriş yapabilirsiniz.";
+                    
+
+            }
+            else
+            {
+                ViewBag.status = "Hata Meydana geldi.";
+
+            }
+            return View();
+        }
+      
     }
 }
