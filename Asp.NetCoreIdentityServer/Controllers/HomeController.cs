@@ -350,6 +350,10 @@ namespace Asp.NetCoreIdentityServer.Controllers
 
             return View("Error", errors);
         }
+        public IActionResult Error()
+        {
+            return View();
+        }
         public IActionResult AuthenticationSignUp()
         {
             AppUser user = CurrentUser;

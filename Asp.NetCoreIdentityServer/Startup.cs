@@ -49,9 +49,8 @@ namespace Asp.NetCoreIdentityServer
                 {
                     policy.AddRequirements(new ExpireDateExchangeRequirement());
                 });
-
-
             });
+
             services.AddAuthentication().AddGoogle(opts =>
             {
                 opts.ClientId = configuration["Authentication:Google:ClientID"];
@@ -61,7 +60,7 @@ namespace Asp.NetCoreIdentityServer
             services.AddIdentity<AppUser, AppRole>(opts=> 
             {
                 opts.User.RequireUniqueEmail = true;
-                opts.User.AllowedUserNameCharacters = "abcçdefghýijklmnoöpqrsþtuüvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._";
+                opts.User.AllowedUserNameCharacters = "abcçdefgðhýijklmnoöpqrsþtuüvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._";
 
                 opts.Password.RequireDigit = false;
                 opts.Password.RequireUppercase = false;

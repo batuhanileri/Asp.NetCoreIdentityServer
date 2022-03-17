@@ -21,7 +21,7 @@ namespace Asp.NetCoreIdentityServer.Helper
             mail.Body = "<h2>Şifrenizi yenilemek için lütfen aşağıdaki linke tıklayınız.</h2><hr/>";
             mail.Body += $"<a href='{link}'> şifre yenileme linki</a>";
             mail.IsBodyHtml = true;
-            smtpClient.Credentials = new NetworkCredential("bertictest@gmail.com", "Batu..16");
+            smtpClient.Credentials = new NetworkCredential("bertictest@gmail.com", "***");
 
             smtpClient.Port = 587;
             smtpClient.Host = "smtp.gmail.com";
