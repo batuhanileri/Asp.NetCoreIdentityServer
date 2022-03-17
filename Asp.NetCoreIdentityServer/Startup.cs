@@ -52,6 +52,11 @@ namespace Asp.NetCoreIdentityServer
 
 
             });
+            services.AddAuthentication().AddGoogle(opts =>
+            {
+                opts.ClientId = configuration["Authentication:Google:ClientID"];
+                opts.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+            });
 
             services.AddIdentity<AppUser, AppRole>(opts=> 
             {
