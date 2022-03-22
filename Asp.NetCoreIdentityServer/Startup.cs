@@ -16,7 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Microsoft.Extensions.Hosting;
 namespace Asp.NetCoreIdentityServer
 {
     public class Startup
@@ -108,7 +108,14 @@ namespace Asp.NetCoreIdentityServer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseDeveloperExceptionPage(); //Sayfada hata aldýðýn zaman hatayla ilgili açýklayýcý bilgi sunuyor
+            if(env.IsDevelopment())
+            {
+            
+                app.UseDeveloperExceptionPage();   //Sayfada hata aldýðýn zaman hatayla ilgili açýklayýcý bilgi sunuyor
+                app.UseBrowserLink();
+
+            }
+
             app.UseStatusCodePages(); //Boþ bir sayfa dönmek yerine hatanýn nerde olduðunu gösteren yazý gösteriyor
 
             app.UseStaticFiles(); // js , css dosyalarýný yükleyip çalýþtýrabilmek için staticfiles ekliyoruz.
