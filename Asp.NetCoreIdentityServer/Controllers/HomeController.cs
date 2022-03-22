@@ -128,7 +128,7 @@ namespace Asp.NetCoreIdentityServer.Controllers
                 user.UserName = userViewModel.UserName;
                 user.Email = userViewModel.Email;
                 user.PhoneNumber = userViewModel.PhoneNumber;
-
+                user.TwoFactor = 0;
                 IdentityResult result = await _userManager.CreateAsync(user, userViewModel.Password);
 
                 if (result.Succeeded)

@@ -16,6 +16,7 @@ namespace Asp.NetCoreIdentityServer.ViewModels
         [Required(ErrorMessage ="Doğrulama kodu gereklidir.")]
         public string VerificationCode { get; set; }
 
+        [Display(Name ="İki Adımlı Kimlik Doğrulama Tipi")]
         public TwoFactor TwoFactorType { get; set; }
     }
 }
