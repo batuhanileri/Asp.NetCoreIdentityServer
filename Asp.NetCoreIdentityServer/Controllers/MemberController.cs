@@ -204,6 +204,16 @@ namespace Asp.NetCoreIdentityServer.Controllers
         {
             return View();
         }
+
+        public IActionResult TwoFactorAuth()
+        {
+            AuthenticatorViewModel model = new AuthenticatorViewModel()
+            {
+                TwoFactorType = (TwoFactor)CurrentUser.TwoFactor
+            };
+
+            return View(model);
+        }
             
     }
 }
