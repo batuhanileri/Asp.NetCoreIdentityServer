@@ -214,6 +214,20 @@ namespace Asp.NetCoreIdentityServer.Controllers
 
             return View(model);
         }
-            
+        [HttpPost]
+        public async Task<IActionResult> TwoFactorAuth(AuthenticatorViewModel authenticatorView)
+        {
+            switch(authenticatorView.TwoFactorType)
+            {
+                case TwoFactor.None:
+                    CurrentUser.TwoFactorEnabled = false;
+                    CurrentUser.TwoFactor = (sbyte)TwoFactor.None;
+
+                    TempData["message"] = "İki adımlı kimlik doğrulama işlemi hiçbiri olarak güncellendi";
+                    break;
+            }
+            await _userManager.UpdateAsync(CurrentUser);
+            return View(authenticatorView);
+        }
     }
 }

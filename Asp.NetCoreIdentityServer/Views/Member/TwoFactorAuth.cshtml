@@ -13,7 +13,6 @@
             <div class="form-group">
                 <label asp-for="TwoFactorType" class="control-label"></label>
                 <select class="form-control" asp-for="TwoFactorType" asp-items="Html.GetEnumSelectList<TwoFactor>()">
-                    
                 </select>
             </div>
             <br />
@@ -24,12 +23,23 @@
 
         </form>
     </div>
-    @if(ViewBag.warning!=null)
-            {
-                  <div class="col-md-12">
-                      <div class="alert alert-warning">
-                          @ViewBag.warning
-                      </div>
-                  </div>
-            }
+    <br />
+    <br />
+    @if (ViewBag.warning != null)
+    {
+        <div class="col-md-12">
+            <div class="alert alert-warning">
+                @ViewBag.warning
+            </div>
+        </div>
+    }
+    @if (TempData["message"] != null)
+    {
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                @TempData["message"]
+            </div>
+        </div>
+    }
+
 </div>
