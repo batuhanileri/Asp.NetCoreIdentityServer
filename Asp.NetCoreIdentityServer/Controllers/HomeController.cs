@@ -117,6 +117,67 @@ namespace Asp.NetCoreIdentityServer.Controllers
             return View(loginViewModel);
         }
 
+        public async Task<IActionResult> TwoFactorLogin(string ReturnUrl = "/")
+        {
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+            TempData["ReturnUrl"] = ReturnUrl;
+
+            switch((TwoFactor)user.TwoFactor)
+            {
+                case TwoFactor.Google:
+                        break;
+            }
+            var model = new TwoFactorLoginViewModel()
+            {
+                TwoFactorType = (TwoFactor)user.TwoFactor,
+                isRecoverCode = false,
+                isRememberMe = false,
+                VerificationCode = string.Empty
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> TwoFactorLogin(TwoFactorLoginViewModel twoFactorLoginView)
+        {
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+
+            ModelState.Clear();
+            bool isSuccessAuth = false;
+
+            if ((TwoFactor)user.TwoFactor == TwoFactor.Google)
+            {
+                Microsoft.AspNetCore.Identity.SignInResult result;
+
+                if (twoFactorLoginView.isRecoverCode)
+                {
+                    result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(twoFactorLoginView.VerificationCode);
+                }
+                else
+                {
+                    result = await _signInManager.TwoFactorAuthenticatorSignInAsync(twoFactorLoginView.VerificationCode, twoFactorLoginView.isRememberMe, false);
+                }
+                if (result.Succeeded)
+                {
+                    isSuccessAuth = true;
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Doğrulama kodu yanlış");
+                }
+            }
+           
+
+            if (isSuccessAuth)
+            {
+                return Redirect(TempData["ReturnUrl"].ToString());
+            }
+            twoFactorLoginView.TwoFactorType = (TwoFactor)user.TwoFactor;
+
+            return View(twoFactorLoginView);
+        }
+
+
         public IActionResult SignUp()
         {
             return View();
