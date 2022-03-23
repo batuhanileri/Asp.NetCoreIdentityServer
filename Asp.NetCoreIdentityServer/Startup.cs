@@ -16,7 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
+
 namespace Asp.NetCoreIdentityServer
 {
     public class Startup
@@ -117,8 +117,9 @@ namespace Asp.NetCoreIdentityServer
 
             }
 
+            app.UseDeveloperExceptionPage();
             app.UseStatusCodePages(); //Boþ bir sayfa dönmek yerine hatanýn nerde olduðunu gösteren yazý gösteriyor
-
+            app.UseHttpsRedirection();
             app.UseStaticFiles(); // js , css dosyalarýný yükleyip çalýþtýrabilmek için staticfiles ekliyoruz.
             app.UseAuthentication();
             app.UseMvcWithDefaultRoute();

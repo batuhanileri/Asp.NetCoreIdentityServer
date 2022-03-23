@@ -32,7 +32,7 @@ namespace Asp.NetCoreIdentityServer.Controllers
             return View();
         }
 
-        public IActionResult Login(string ReturnUrl)
+        public IActionResult Login(string ReturnUrl="/")
         {
             TempData["ReturnUrl"] = ReturnUrl;
             return View();
@@ -63,24 +63,28 @@ namespace Asp.NetCoreIdentityServer.Controllers
                         return View(loginViewModel);
 
                     }
+                    bool userCheck = await _userManager.CheckPasswordAsync(user, loginViewModel.Password);
 
-
-                    await _signInManager.SignOutAsync(); // önce bi çıkış olsun ki sistemde eski bir key silinsin
-
-                    Microsoft.AspNetCore.Identity.SignInResult signInResult = await _signInManager.PasswordSignInAsync(user, loginViewModel.Password, loginViewModel.RememberMe, false);
-
-                    // Paramaterenin içindeki loginViewModel.RememberMe beni hatırla özelliği gibi cookie expiration(60 gün) olanı etkin hale getirme işine yarıyor
-                    // Son false başarsısız girişlerde kullanıcıyı kilitlicek misin anlamına geliyor.
-                    if (signInResult.Succeeded)
+                    if(userCheck)
                     {
                         await _userManager.ResetAccessFailedCountAsync(user);//Kullanıcı başarılı giriş yapmış fail sayısını 0'lıyoruz.
+                        await _signInManager.SignOutAsync(); // önce bi çıkış olsun ki sistemde eski bir key silinsin
 
-                        if (TempData["ReturnUrl"] != null)
+                        Microsoft.AspNetCore.Identity.SignInResult signInResult = await _signInManager.PasswordSignInAsync(user, loginViewModel.Password, loginViewModel.RememberMe, false);
+
+                        // Paramaterenin içindeki loginViewModel.RememberMe beni hatırla özelliği gibi cookie expiration(60 gün) olanı etkin hale getirme işine yarıyor
+                        // Son false başarısız girişlerde kullanıcıyı kilitlicek misin anlamına geliyor.
+
+                         if(signInResult.RequiresTwoFactor)
+                        {
+                            return RedirectToAction("TwoFactorLogin");
+                        }
+                        else
                         {
                             return Redirect(TempData["ReturnUrl"].ToString());
                         }
-                        return RedirectToAction("Index", "Member");
                     }
+
                     else
                     {
                         await _userManager.AccessFailedAsync(user); // Kullanıcın her yanlış girişini kaydedip sayıyı 1 artırır. 
